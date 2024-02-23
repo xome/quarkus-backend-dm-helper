@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional
 import org.apache.http.HttpStatus
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -18,11 +19,19 @@ class AdventuresApiTest {
     @Inject
     lateinit var repo: AdventurePanacheRepo
 
-    @DisplayName("""
+    @BeforeEach
+    @Transactional
+    fun initData() {
+        repo.deleteAll()
+    }
+
+    @DisplayName(
+        """
         Given there are Adventures with the names "A" and "B",
         When Api Get is called,
         Then they both are returned
-    """)
+    """
+    )
     @Test
     fun getAllAdventures() {
 
@@ -34,12 +43,9 @@ class AdventuresApiTest {
         adventure1.name = "A"
         insertAdventure(adventure1)
 
-        val retrievedBody = given()
-                .`when`().get("/adventures")
-                .then().statusCode(HttpStatus.SC_OK)
-                .extract().body().asString()
+        val retrievedBody = Utils.getAllAdventures()
 
-        assertThat(retrievedBody, `is`("[\"A\",\"B\"]"))
+        assertThat(retrievedBody, `is`(listOf("A", "B")));
 
     }
 
