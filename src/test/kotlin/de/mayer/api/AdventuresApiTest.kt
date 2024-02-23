@@ -3,10 +3,8 @@ package de.mayer.api
 import de.mayer.persistence.AdventurePanacheRepo
 import de.mayer.persistence.dto.AdventureDto
 import io.quarkus.test.junit.QuarkusTest
-import io.restassured.RestAssured.given
 import jakarta.inject.Inject
 import jakarta.transaction.Transactional
-import org.apache.http.HttpStatus
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -45,7 +43,7 @@ class AdventuresApiTest {
 
         val retrievedBody = Utils.getAllAdventures()
 
-        assertThat(retrievedBody, `is`(listOf("A", "B")));
+        assertThat(retrievedBody, `is`(listOf("A", "B")))
 
     }
 

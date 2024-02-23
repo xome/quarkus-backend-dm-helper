@@ -1,6 +1,5 @@
 package de.mayer.api
 
-import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import org.apache.http.HttpStatus

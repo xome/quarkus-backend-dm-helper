@@ -2,14 +2,12 @@ package de.mayer.api
 
 import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.AdventureRepository
 import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure
-import io.netty.handler.codec.http.HttpResponseStatus
 import jakarta.transaction.Transactional
 import jakarta.ws.rs.DELETE
 import jakarta.ws.rs.PATCH
 import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.core.Response
-import org.jboss.resteasy.reactive.RestPath
 
 @Path("/adventure/{adventureName}")
 class AdventureApi(val adventureRepository: AdventureRepository) {
@@ -20,7 +18,7 @@ class AdventureApi(val adventureRepository: AdventureRepository) {
             return Response.status(Response.Status.BAD_REQUEST).build()
 
         adventureRepository.save(Adventure(adventureName, emptyList()))
-        return Response.ok().build();
+        return Response.ok().build()
     }
 
     @PATCH

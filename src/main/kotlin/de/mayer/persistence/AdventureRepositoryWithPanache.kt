@@ -7,13 +7,12 @@ import io.quarkus.panache.common.Sort
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
 import java.util.*
-import kotlin.jvm.optionals.getOrDefault
 
 @ApplicationScoped
 class AdventureRepositoryWithPanache(val adventurePanacheRepo: AdventurePanacheRepo) : AdventureRepository {
     override fun findByName(adventureName: String): Optional<Adventure> {
         val dtoOpt = adventurePanacheRepo.find("name", adventureName)
-            .singleResultOptional<AdventureDto>();
+            .singleResultOptional<AdventureDto>()
 
         if (dtoOpt.isEmpty) return Optional.empty()
 
@@ -31,7 +30,7 @@ class AdventureRepositoryWithPanache(val adventurePanacheRepo: AdventurePanacheR
     @Transactional
     override fun changeName(adventure: Adventure, newName: String) {
         val adventureDto = adventurePanacheRepo.find("name", adventure.name).firstResult<AdventureDto>()
-        adventureDto.name = newName;
+        adventureDto.name = newName
         adventurePanacheRepo.persist(adventureDto)
     }
 
