@@ -5,12 +5,9 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 
 @Entity(name = "adventure")
-class AdventureDto() {
+data class AdventureDto(
 
-    @get: GeneratedValue
-    @get: Id
-    var id: Long? = null
-
+    @Id @GeneratedValue var id: Long? = null,
     var name: String? = null
 
-}
+)

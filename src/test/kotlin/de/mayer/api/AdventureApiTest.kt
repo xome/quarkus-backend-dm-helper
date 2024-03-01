@@ -1,7 +1,6 @@
 package de.mayer.api
 
 import de.mayer.persistence.AdventurePanacheRepo
-import de.mayer.persistence.dto.AdventureDto
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType
@@ -19,7 +18,10 @@ import org.junit.jupiter.api.Test
 class AdventureApiTest {
 
     @Inject
-    lateinit var adventurePanacheRepo: AdventurePanacheRepo;
+    lateinit var adventurePanacheRepo: AdventurePanacheRepo
+
+    @Inject
+    lateinit var utils: Utils
 
     val url = "/adventure/{adventureName}"
 
@@ -44,19 +46,19 @@ class AdventureApiTest {
         put(adventureName)
             .then().statusCode(HttpStatus.SC_OK)
 
-        assertThat(Utils.getAllAdventures(), `is`(listOf(adventureName)))
+        assertThat(utils.getAllAdventures(), `is`(listOf(adventureName)))
 
         val newAdventureName = "Updated Adventure"
 
         patch(adventureName, newAdventureName)
             .then().statusCode(HttpStatus.SC_OK)
 
-        assertThat(Utils.getAllAdventures(), `is`(listOf(newAdventureName)))
+        assertThat(utils.getAllAdventures(), `is`(listOf(newAdventureName)))
 
         delete(newAdventureName)
             .then().statusCode(HttpStatus.SC_OK)
 
-        assertThat(Utils.getAllAdventures(), `is`(emptyList()))
+        assertThat(utils.getAllAdventures(), `is`(emptyList()))
     }
 
     @DisplayName(
@@ -69,7 +71,7 @@ class AdventureApiTest {
     @Test
     fun adventureByTheNameAlreadyExists() {
         val name = "Testadventure"
-        insertAdv(name)
+        utils.insertAdv(name)
 
         put(name)
             .then().statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -89,44 +91,43 @@ class AdventureApiTest {
             .then().statusCode(HttpStatus.SC_NOT_FOUND)
     }
 
-    @DisplayName("""
+    @DisplayName(
+        """
         Given there already exists an Adventure by the name "Testadventure",
         When another Adventure should be renamned to "Testadventure",
         Then StatusCode 400 is returned
-    """)
+    """
+    )
     @Test
-    fun renameToAlreadyExistingAdventure(){
+    fun renameToAlreadyExistingAdventure() {
         val adventureNameToBeRenamed = "Rename me!"
         val newAdventureName = "Testadventure"
-        insertAdv(adventureNameToBeRenamed)
-        insertAdv(newAdventureName)
+        utils.insertAdv(adventureNameToBeRenamed)
+        utils.insertAdv(newAdventureName)
 
-        patch(adventureNameToBeRenamed, newAdventureName)
+        patch(adventureNameToBeRenamed,  newAdventureName)
             .then().statusCode(HttpStatus.SC_BAD_REQUEST)
 
     }
 
-    @DisplayName("""
+    @DisplayName(
+        """
         Given there is Adventure by the name "Testadventure",
         When the Adventure should be deleted,
         Then status 404 is returned
-    """)
+    """
+    )
     @Test
     fun deleteNonExistentAdventure() {
         delete("Testadventure")
             .then().statusCode(HttpStatus.SC_NOT_FOUND)
     }
 
-    @Transactional
-    fun insertAdv(name: String) {
-        val adv = AdventureDto()
-        adv.name = name
-        adventurePanacheRepo.persist(adv)
-    }
 
     private fun put(adventureName: String): Response =
         given().with().pathParams("adventureName", adventureName)
             .`when`().put(url)
+
     private fun delete(newAdventureName: String): Response =
         given().with().pathParams("adventureName", newAdventureName)
             .`when`().delete(url)

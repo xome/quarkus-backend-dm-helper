@@ -17,6 +17,9 @@ class AdventuresApiTest {
     @Inject
     lateinit var repo: AdventurePanacheRepo
 
+    @Inject
+    lateinit var utils: Utils
+
     @BeforeEach
     @Transactional
     fun initData() {
@@ -41,7 +44,7 @@ class AdventuresApiTest {
         adventure1.name = "A"
         insertAdventure(adventure1)
 
-        val retrievedBody = Utils.getAllAdventures()
+        val retrievedBody = utils.getAllAdventures()
 
         assertThat(retrievedBody, `is`(listOf("A", "B")))
 

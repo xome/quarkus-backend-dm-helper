@@ -2,7 +2,6 @@ package de.mayer.api
 
 import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.AdventureRepository
 import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure
-import jakarta.transaction.Transactional
 import jakarta.ws.rs.DELETE
 import jakarta.ws.rs.PATCH
 import jakarta.ws.rs.PUT
@@ -37,11 +36,9 @@ class AdventureApi(val adventureRepository: AdventureRepository) {
     }
 
     @DELETE
-    @Transactional
     fun deleteAdventure(adventureName: String): Response {
         if (adventureRepository.findByName(adventureName).isEmpty)
             return Response.status(Response.Status.NOT_FOUND).build()
-
         adventureRepository.delete(Adventure(adventureName, emptyList()))
         return Response.ok().build()
     }
