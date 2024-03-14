@@ -1,5 +1,7 @@
 package de.mayer.api
 
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterAlreadyExistsException
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterNotFoundException
 import de.mayer.penandpaperdmhelperjcore.adventure.model.Chapter
 import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterRepository
 import jakarta.ws.rs.DELETE
@@ -28,14 +30,24 @@ class ChapterByNameApi(val chapterRepository: ChapterRepository) {
     fun patchChapter(adventureName: String,
                      chapterName: String,
                      chapter: Chapter): Response {
-        chapterRepository.update(adventureName, chapterName, chapter)
+        try {
+            chapterRepository.update(adventureName, chapterName, chapter)
+        } catch (_: ChapterAlreadyExistsException){
+            return Response.status(Response.Status.BAD_REQUEST).build()
+        } catch (_: ChapterNotFoundException){
+            return Response.status(Response.Status.NOT_FOUND).build()
+        }
         return Response.ok().build()
     }
 
     @DELETE
     fun deleteChapter(adventureName: String,
                       chapterName: String): Response {
-        chapterRepository.delete(adventureName, chapterName)
+        try {
+            chapterRepository.delete(adventureName, chapterName)
+        } catch (_: ChapterNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND).build()
+        }
         return Response.ok().build()
     }
 

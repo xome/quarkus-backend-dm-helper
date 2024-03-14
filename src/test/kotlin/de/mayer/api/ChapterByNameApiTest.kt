@@ -88,6 +88,78 @@ class ChapterByNameApiTest {
             .statusCode(HttpStatus.SC_NOT_FOUND)
 
     }
+    @DisplayName("""
+        Given there already exists a Chapter by the name "Testchapter"
+        When another Chapter is patched to the new name "Testchapter",
+        Then Status 400 is returned
+    """)
+    @Test
+    fun patchNewNameAlreadyExists() {
+        val adventure = utils.insertAdv("Testadventure")
+
+        val chapterOne = ChapterDto()
+        chapterOne.adventure = adventure.id
+        chapterOne.name = "Testchapter"
+        utils.insertChapter(chapterOne)
+
+        val chapterTwo = ChapterDto()
+        chapterTwo.name = "New Chapter"
+        chapterTwo.adventure = adventure.id
+        utils.insertChapter(chapterTwo)
+
+        given()
+            .with()
+            .pathParams("adventureName", adventure.name, "chapterName", chapterTwo.name)
+            .contentType(ContentType.JSON)
+            .body(jsonChapterOnlyWithName(chapterOne, true))
+            .`when`()
+            .patch(url)
+            .then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST)
+
+    }
+
+    @DisplayName("""
+        Given there is no Chapter by the name "Testchapter",
+        When it is patched with a new name,
+        Then status NOT_FOUND is returned
+    """)
+    @Test
+    fun patchNonExistentChapter(){
+
+        val adventure = utils.insertAdv("Testadventure")
+        val patchChapter = ChapterDto()
+        patchChapter.name = "Another Testchapter"
+
+        given()
+            .with()
+            .pathParams("adventureName", adventure.name, "chapterName", "Testchapter")
+            .contentType(ContentType.JSON)
+            .body(jsonChapterOnlyWithName(patchChapter, true))
+            .`when`()
+            .patch(url)
+            .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+    }
+
+    @DisplayName("""
+        Given there is no Chapter by the name "Testchapter",
+        When it is to be deleted,
+        Then status NOT_FOUND is returned
+    """)
+    @Test
+    fun deleteNonExistentChapter(){
+        val adventure = utils.insertAdv("Testadventure")
+
+        given()
+            .with()
+            .pathParams("adventureName", adventure.name, "chapterName", "Testchapter")
+            .`when`()
+            .delete(url)
+            .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+
+    }
 
     private fun jsonChapterOnlyWithName(chapterDto: ChapterDto, recordsNull: Boolean): String {
         val records = if (recordsNull) "null" else "[]"

@@ -1,5 +1,7 @@
 package de.mayer.persistence
 
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterAlreadyExistsException
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterNotFoundException
 import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterRepository
 import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.RecordRepository
 import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure
@@ -51,14 +53,31 @@ class ChapterRepositoryWithPanache(
         val adventureDto = adventurePanacheRepo.find("name", adventureName)
             .firstResultOptional<AdventureDto>()
 
-        val chapterDto = find("adventure = ?1 and name = ?2", adventureDto.get().id, chapterName)
-            .firstResult<ChapterDto>()
+        val adventure = adventureDto.get()
 
+        val chapterDtoOptional = find("adventure = ?1 and name = ?2",
+            adventure.id, chapterName)
+            .firstResultOptional<ChapterDto>()
 
-        if (chapter.name != null && !chapter.name.equals(chapterDto.name))
+        if (chapterDtoOptional.isEmpty)
+            throw ChapterNotFoundException()
+
+        val chapterDto = chapterDtoOptional.get()
+
+        if (chapter.name != null && !chapter.name.equals(chapterDto.name)) {
+            val otherChapterWithNewName = find("adventure = ?1 and name = ?2",
+                adventure.id, chapter.name)
+                .firstResultOptional<ChapterDto>()
+
+            if (otherChapterWithNewName.isPresent)
+                throw ChapterAlreadyExistsException()
+
             chapterDto.name = chapter.name
+        }
+
         if (chapter.subheader != null && !chapter.subheader.equals(chapterDto.subheader))
             chapterDto.subheader = chapter.subheader
+
         if (chapter.approximateDurationInMinutes != null &&
             !chapter.approximateDurationInMinutes.equals(chapterDto.approximateDurationInMinutes)
         )
@@ -74,6 +93,9 @@ class ChapterRepositoryWithPanache(
     @Transactional
     override fun delete(adventureName: String, chapterName: String) {
         val adventureDto = adventurePanacheRepo.find("name", adventureName).firstResultOptional<AdventureDto>()
-        delete("adventure = ?1 and name = ?2", adventureDto.get().id, chapterName)
+        val rowsDeleted = delete("adventure = ?1 and name = ?2", adventureDto.get().id, chapterName)
+        if (rowsDeleted == 0L) {
+            throw ChapterNotFoundException()
+        }
     }
 }
